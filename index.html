@@ -589,6 +589,20 @@ function pvp({i,qs,names}){
 // ---------- online 2-device (WebRTC via PeerJS, host-authoritative) ----------
 const ROOM_PREFIX='ielts-sk-v1-';
 let net=null; // {peer,conn}
+// Tùy chọn: dán link lấy TURN credentials của Metered (Open Relay, miễn phí 20GB/tháng) để chơi được trên mạng chặn kết nối trực tiếp.
+// Dạng: https://<ten-app>.metered.live/api/v1/turn/credentials?apiKey=<API_KEY>
+const TURN_CREDENTIALS_URL="";
+let _ice=null;
+async function peerOpts(){
+  if(!_ice){_ice=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
+    if(TURN_CREDENTIALS_URL){try{const r=await fetch(TURN_CREDENTIALS_URL);const x=await r.json();if(Array.isArray(x))_ice=_ice.concat(x)}catch(e){}}}
+  return {config:{iceServers:_ice},debug:1};
+}
+function keepAlive(peer,onMsg){
+  peer.on('disconnected',()=>{onMsg&&onMsg('Mất kết nối tới máy chủ, đang kết nối lại…');setTimeout(()=>{try{if(!peer.destroyed)peer.reconnect()}catch(e){}},800)});
+  const v=()=>{if(document.visibilityState==='visible'&&peer.disconnected&&!peer.destroyed){try{peer.reconnect()}catch(e){}}};
+  document.addEventListener('visibilitychange',v);
+}
 function closeNet(){if(net){try{net.conn&&net.conn.close()}catch(e){}try{net.peer&&net.peer.destroy()}catch(e){}net=null}}
 function roomCode(){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';return Array.from({length:5},()=>A[Math.floor(Math.random()*A.length)]).join('')}
 function onlineOK(){return typeof window.Peer==='function'}
@@ -603,14 +617,17 @@ function host({i,n,name}){
   <div class="btns"><button class="ghost" id="copy">Sao chép link mời</button></div><p id="hs" style="margin-top:16px">Đang tạo phòng…</p></div>`;
   document.getElementById('bk').onclick=()=>{closeNet();go('setup',i)};
   const hs=document.getElementById('hs');
-  function open(){
-    closeNet();
-    const peer=new Peer(ROOM_PREFIX+code);net={peer,conn:null};
-    peer.on('open',()=>{document.getElementById('code').textContent=code;hs.textContent='Đang chờ đối thủ vào phòng…'});
+  async function open(){
+    closeNet();hs.textContent='Đang kết nối máy chủ…';
+    const peer=new Peer(ROOM_PREFIX+code,await peerOpts());net={peer,conn:null};
+    const to=setTimeout(()=>{if(!peer.open)hs.textContent='Không kết nối được máy chủ ghép phòng sau 12 giây. Kiểm tra mạng hoặc tải lại trang.'},12000);
+    keepAlive(peer,m=>hs.textContent=m);
+    peer.on('open',()=>{clearTimeout(to);document.getElementById('code').textContent=code;if(!net.conn)hs.textContent='Phòng đã sẵn sàng. Giữ màn hình này mở cho đến khi đối thủ vào.'});
     peer.on('error',e=>{if(e.type==='unavailable-id'){code=roomCode();open()}else hs.textContent='Lỗi kết nối: '+(e.type||e.message)+'. Tải lại trang để thử lại.'});
     peer.on('connection',conn=>{
       if(net.conn){conn.on('open',()=>{conn.send({type:'full'});setTimeout(()=>conn.close(),300)});return}
-      net.conn=conn;
+      net.conn=conn;hs.textContent='Đối thủ đang kết nối…';
+      conn.on('error',e=>hs.textContent='Lỗi kết nối với đối thủ: '+(e.type||e.message));
       conn.on('data',d=>{if(d&&d.type==='join'){startOnline({role:0,i,n,names:[name,String(d.name||'Người chơi 2').slice(0,16)]})}});
     });
   }
@@ -630,37 +647,50 @@ function join(prefill){
     if(!onlineOK()){js.textContent='Chế độ online cần mở game từ trang web đã deploy.';return}
     const code=document.getElementById('rc').value.trim().toUpperCase(),name=document.getElementById('nm').value.trim()||'Người chơi 2';
     if(code.length!==5){js.textContent='Mã phòng gồm 5 ký tự.';return}
-    closeNet();js.textContent='Đang kết nối…';
-    const peer=new Peer();net={peer,conn:null};
-    peer.on('error',e=>{js.textContent=e.type==='peer-unavailable'?'Không tìm thấy phòng. Kiểm tra lại mã, hoặc chủ phòng đã đóng trang.':'Lỗi kết nối: '+(e.type||e.message)});
-    peer.on('open',()=>{const conn=peer.connect(ROOM_PREFIX+code,{reliable:true});net.conn=conn;
-      conn.on('open',()=>{conn.send({type:'join',name});js.textContent='Đã vào phòng, chờ bắt đầu…'});
+    closeNet();js.textContent='Bước 1/2: đang kết nối máy chủ ghép phòng…';
+    (async()=>{
+    const peer=new Peer(undefined,await peerOpts());net={peer,conn:null};
+    const t1=setTimeout(()=>{if(!peer.open)js.textContent='Không kết nối được máy chủ ghép phòng sau 12 giây. Kiểm tra mạng hoặc thử lại.'},12000);
+    keepAlive(peer);
+    peer.on('error',e=>{clearTimeout(t1);js.textContent=e.type==='peer-unavailable'?'Không tìm thấy phòng '+code+'. Kiểm tra lại mã, hoặc màn hình của chủ phòng đã tắt. Nhờ chủ phòng tạo phòng mới rồi thử lại.':'Lỗi kết nối: '+(e.type||e.message)});
+    peer.on('open',()=>{clearTimeout(t1);js.textContent='Bước 2/2: đã thấy máy chủ, đang nối trực tiếp tới phòng '+code+'…';
+      const conn=peer.connect(ROOM_PREFIX+code,{reliable:true});net.conn=conn;
+      const t2=setTimeout(()=>{if(!conn.open)js.textContent='Không nối trực tiếp được tới chủ phòng sau 15 giây. Thường do mạng chặn kết nối ngang hàng (4G, wifi trường/công ty). Thử cả hai dùng cùng một wifi, hoặc bật TURN server.'},15000);
+      conn.on('error',e=>js.textContent='Lỗi kết nối: '+(e.type||e.message));
+      conn.on('open',()=>{clearTimeout(t2);conn.send({type:'join',name});js.textContent='Đã vào phòng, chờ bắt đầu…'});
       let started=false;conn.on('data',d=>{if(d&&d.type==='full')js.textContent='Phòng đã đủ 2 người.';else if(d&&d.type==='state'&&!started){started=true;startOnline({role:1,first:d.s})}});
     });
+    })();
   };
 }
 
 function startOnline({role,i,n,names,first}){
   setTab('flash');stopMascots();
-  const conn=net.conn; let S=null, resolved=false, advT=null, evN=0, mEl=null, curK=-1, curRound=-1;
+  const conn=net.conn; const WINDOW=800; let winT=null, qStart=0, S=null, resolved=false, advT=null, evN=0, mEl=null, curK=-1, curRound=-1;
   const send=m=>{try{conn.open&&conn.send(m)}catch(e){}};
   // host-only logic
   function fresh(){const qidx=sample([...CLUSTERS[i].keys()],n);return qidx}
   function newGame(){const m=pickMascots(2).map(x=>MASCOTS.indexOf(x));
-    S={i,qidx:fresh(),k:0,score:[0,0],locked:[false,false],skip:[false,false],reveal:null,names,mascots:m,phase:'play',ev:null,round:(S?S.round+1:0)};resolved=false;push()}
+    S={i,qidx:fresh(),k:0,score:[0,0],locked:[false,false],skip:[false,false],pend:[null,null],reveal:null,names,mascots:m,phase:'play',ev:null,round:(S?S.round+1:0)};resolved=false;push()}
   function push(){send({type:'state',s:S});render(S)}
-  function advance(ms){resolved=true;clearTimeout(advT);advT=setTimeout(()=>{S.k++;S.locked=[false,false];S.skip=[false,false];S.reveal=null;resolved=false;if(S.k>=S.qidx.length)S.phase='end';push()},ms)}
+  function advance(ms){resolved=true;clearTimeout(advT);advT=setTimeout(()=>{S.k++;S.locked=[false,false];S.skip=[false,false];S.pend=[null,null];S.reveal=null;resolved=false;if(S.k>=S.qidx.length)S.phase='end';push()},ms)}
   function apply(a,p){
     if(!S)return;
     if(a.type==='rematch'&&p===0&&S.phase==='end'){newGame();return}
     if(S.phase!=='play'||resolved||a.k!==S.k)return;
     const r=CLUSTERS[S.i][S.qidx[S.k]];
-    if(a.type==='answer'&&!S.locked[p]){
-      if(norm(a.text)===norm(r.w)){S.score[p]++;S.reveal={kind:'ok',p};S.ev={n:++evN,p,ok:true};advance(1300)}
-      else{S.locked[p]=true;S.ev={n:++evN,p,ok:false};
-        if(S.locked[0]&&S.locked[1]){S.reveal={kind:'both'};advance(1900)}else S.reveal={kind:'wrong',p}}
+    if(a.type==='answer'&&!S.locked[p]&&S.pend[p]===null){
+      const ms=Math.max(0,Math.min(3600000,Number(a.ms)||3600000));
+      if(norm(a.text)===norm(r.w)){
+        S.pend[p]=ms;
+        // Chờ thêm một khoảng ngắn để nhận đáp án đúng của đối thủ (bù độ trễ mạng), rồi trao điểm cho người có thời gian tự đo ngắn hơn.
+        if(!winT)winT=setTimeout(()=>{winT=null;const c=[0,1].filter(x=>S.pend[x]!==null);const w=c.reduce((b,x)=>S.pend[x]<S.pend[b]?x:b,c[0]);
+          S.score[w]++;S.reveal={kind:'ok',p:w,t:[S.pend[0],S.pend[1]]};S.ev={n:++evN,p:w,ok:true};push();advance(1600)},WINDOW);
+      }else{S.locked[p]=true;S.ev={n:++evN,p,ok:false};
+        const other=1-p;
+        if(S.locked[other]){S.reveal={kind:'both'};advance(1900)}else if(S.pend[other]===null)S.reveal={kind:'wrong',p}}
       push();
-    }else if(a.type==='skip'){S.skip[p]=true;if(S.skip[0]&&S.skip[1]){S.reveal={kind:'skip'};advance(1600)}push()}
+    }else if(a.type==='skip'&&!winT){S.skip[p]=true;if(S.skip[0]&&S.skip[1]){S.reveal={kind:'skip'};advance(1600)}push()}
   }
   const act=a=>role===0?apply(a,0):send({type:'act',a});
   conn.on('data',d=>{if(!d)return;if(role===0&&d.type==='act')apply(d.a,1);if(role===1&&d.type==='state')render(d.s)});
@@ -697,17 +727,20 @@ function startOnline({role,i,n,names,first}){
       <div class="qcard">${clueHTML(r)}<div id="orv"></div></div>
       <div class="answer" id="oans"><input class="txt" id="oinp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Gõ từ rồi nhấn Enter"><button class="primary" id="osub">Trả lời</button></div>
       <div style="margin-top:8px;text-align:center"><button class="linkbtn" id="oskip"></button></div>`;
-      const inp=document.getElementById('oinp');inp.focus();
-      const sub=()=>{if(inp.value.trim())act({type:'answer',k:s.k,text:inp.value})};
+      qStart=performance.now();const inp=document.getElementById('oinp');inp.focus();
+      const sub=()=>{if(inp.value.trim())act({type:'answer',k:s.k,text:inp.value,ms:Math.round(performance.now()-qStart)})};
       document.getElementById('osub').onclick=sub;inp.addEventListener('keydown',e=>{if(e.key==='Enter')sub()});
       document.getElementById('oskip').onclick=()=>act({type:'skip',k:curK});
     }
     const inp=document.getElementById('oinp'),ans=document.getElementById('oans'),rv=document.getElementById('orv');
     const over=!!(s.reveal&&(s.reveal.kind==='ok'||s.reveal.kind==='both'||s.reveal.kind==='skip'));
-    inp.disabled=over||s.locked[role];
+    inp.disabled=over||s.locked[role]||s.pend[role]!==null;
     const R=s.reveal;
-    if(!R){rv.innerHTML='';ans.className='answer'}
-    else if(R.kind==='ok'){rv.innerHTML=`<p class="reveal ok">${esc(s.names[R.p])} đúng trước: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;ans.className=R.p===role?'answer ok':'answer'}
+    if(!R&&s.pend[role]!==null){rv.innerHTML=`<p class="reveal ok">Bạn trả lời đúng sau ${(s.pend[role]/1000).toFixed(2).replace('.',',')} giây, đang so thời gian với đối thủ…</p>`;ans.className='answer ok'}
+    else if(!R){rv.innerHTML='';ans.className='answer'}
+    else if(R.kind==='ok'){const f=x=>(x/1000).toFixed(2).replace('.',',')+' giây';const both=R.t[0]!==null&&R.t[1]!==null;
+      rv.innerHTML=`<p class="reveal ok">${esc(s.names[R.p])} ${both?'nhanh hơn':'đúng trước'} (${f(R.t[R.p])}${both?' so với '+f(R.t[1-R.p]):''}): <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;ans.className=R.t[role]!==null?'answer ok':'answer'}
+    else if(R.kind==='wrong'&&s.pend[role]!==null){rv.innerHTML=`<p class="reveal ok">Bạn trả lời đúng, đang chờ kết quả…</p>`}
     else if(R.kind==='wrong'){rv.innerHTML=`<p class="reveal bad">${R.p===role?'Bạn trả lời sai, chờ đối thủ.':esc(s.names[R.p])+' trả lời sai. Bạn còn cơ hội!'}</p>`;if(R.p===role){ans.className='answer';void ans.offsetWidth;ans.className='answer bad'}}
     else if(R.kind==='both')rv.innerHTML=`<p class="reveal bad">Cả hai đều sai. Đáp án: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;
     else if(R.kind==='skip')rv.innerHTML=`<p class="reveal bad">Bỏ qua. Đáp án: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;

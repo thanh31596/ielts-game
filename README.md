@@ -20,7 +20,10 @@ Không có backend, không lưu dữ liệu. Toàn bộ là file tĩnh.
 - Kết nối trực tiếp giữa 2 trình duyệt bằng WebRTC qua thư viện [PeerJS](https://peerjs.com) (MIT, bản 1.5.5 đi kèm trong repo).
 - Máy tạo phòng là trọng tài: giữ câu hỏi, chấm đáp án, xác định ai đúng trước, rồi gửi trạng thái cho máy kia.
 - Việc bắt tay ban đầu dùng máy chủ signaling công cộng miễn phí của PeerJS (`0.peerjs.com`). Máy chủ này không cam kết uptime.
-- Một số mạng chặn kết nối trực tiếp (4G có NAT chặt, wifi công ty). Khi đó cần thêm TURN server.
+- Một số mạng chặn kết nối trực tiếp (4G có NAT chặt, wifi công ty/trường). Khi đó cần TURN server:
+  1. Đăng ký miễn phí tại https://www.metered.ca/tools/openrelay/ (20 GB/tháng).
+  2. Tạo app, lấy link *TURN credentials* dạng `https://<ten-app>.metered.live/api/v1/turn/credentials?apiKey=<API_KEY>`.
+  3. Mở `index.html`, tìm dòng `const TURN_CREDENTIALS_URL="";` và dán link vào giữa hai dấu ngoặc kép, rồi commit.
 
 ## Nguồn dữ liệu
 
