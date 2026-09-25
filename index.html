@@ -591,11 +591,11 @@ const ROOM_PREFIX='ielts-sk-v1-';
 let net=null; // {peer,conn}
 // Tùy chọn: dán link lấy TURN credentials của Metered (Open Relay, miễn phí 20GB/tháng) để chơi được trên mạng chặn kết nối trực tiếp.
 // Dạng: https://<ten-app>.metered.live/api/v1/turn/credentials?apiKey=<API_KEY>
-const TURN_CREDENTIALS_URL="";
+const TURN_CREDENTIALS_URL="https://ielts-stephen.metered.live/api/v1/turn/credentials?apiKey=0a218e58a0b6652f9f4ca1e6d1def169087d";
 let _ice=null;
 async function peerOpts(){
   if(!_ice){_ice=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}];
-    if(TURN_CREDENTIALS_URL){try{const r=await fetch(TURN_CREDENTIALS_URL);const x=await r.json();if(Array.isArray(x))_ice=_ice.concat(x)}catch(e){}}}
+    if(TURN_CREDENTIALS_URL){try{const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),6000);const r=await fetch(TURN_CREDENTIALS_URL,{signal:ac.signal});clearTimeout(tm);const x=await r.json();if(Array.isArray(x))_ice=_ice.concat(x)}catch(e){}}}
   return {config:{iceServers:_ice},debug:1};
 }
 function keepAlive(peer,onMsg){
