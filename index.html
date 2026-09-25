@@ -557,9 +557,9 @@ function pvp({i,qs,names}){
       score[p]++;ans.className='answer ok';react(mEl[p],true);react(mEl[1-p],false);
       document.getElementById('rv').innerHTML=`<p class="reveal ok">${esc(names[p])} đúng: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;next(1100);
     }else{
-      locked[p]=true;turn=null;ans.className='answer bad';react(mEl[p],false);
-      if(locked[0]&&locked[1]){document.getElementById('rv').innerHTML=`<p class="reveal bad">Cả hai đều sai. Đáp án: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;zone.hidden=true;next(1900)}
-      else{document.getElementById('rv').innerHTML=`<p class="reveal bad">${esc(names[p])} sai. ${esc(names[1-p])} được quyền trả lời.</p>`;setTimeout(()=>{if(!done&&turn===null)zone.hidden=true},700);paint()}
+      turn=null;ans.className='answer';void ans.offsetWidth;ans.className='answer bad';react(mEl[p],false);
+      document.getElementById('rv').innerHTML=`<p class="reveal bad">${esc(names[p])} trả lời “${esc(inp.value.trim())}” chưa đúng. Cả hai đều có thể bấm chuông lại.</p>`;
+      setTimeout(()=>{if(!done&&turn===null)zone.hidden=true},700);paint()
     }
   }
   document.getElementById('bz0').onclick=()=>buzz(0);
@@ -686,9 +686,7 @@ function startOnline({role,i,n,names,first}){
         // Chờ thêm một khoảng ngắn để nhận đáp án đúng của đối thủ (bù độ trễ mạng), rồi trao điểm cho người có thời gian tự đo ngắn hơn.
         if(!winT)winT=setTimeout(()=>{winT=null;const c=[0,1].filter(x=>S.pend[x]!==null);const w=c.reduce((b,x)=>S.pend[x]<S.pend[b]?x:b,c[0]);
           S.score[w]++;S.reveal={kind:'ok',p:w,t:[S.pend[0],S.pend[1]]};S.ev={n:++evN,p:w,ok:true};push();advance(1600)},WINDOW);
-      }else{S.locked[p]=true;S.ev={n:++evN,p,ok:false};
-        const other=1-p;
-        if(S.locked[other]){S.reveal={kind:'both'};advance(1900)}else if(S.pend[other]===null)S.reveal={kind:'wrong',p}}
+      }else{S.ev={n:++evN,p,ok:false};if(!winT)S.reveal={kind:'wrong',p,n:evN}}
       push();
     }else if(a.type==='skip'&&!winT){S.skip[p]=true;if(S.skip[0]&&S.skip[1]){S.reveal={kind:'skip'};advance(1600)}push()}
   }
@@ -734,14 +732,15 @@ function startOnline({role,i,n,names,first}){
     }
     const inp=document.getElementById('oinp'),ans=document.getElementById('oans'),rv=document.getElementById('orv');
     const over=!!(s.reveal&&(s.reveal.kind==='ok'||s.reveal.kind==='both'||s.reveal.kind==='skip'));
-    inp.disabled=over||s.locked[role]||s.pend[role]!==null;
+    inp.disabled=over||s.pend[role]!==null;
     const R=s.reveal;
     if(!R&&s.pend[role]!==null){rv.innerHTML=`<p class="reveal ok">Bạn trả lời đúng sau ${(s.pend[role]/1000).toFixed(2).replace('.',',')} giây, đang so thời gian với đối thủ…</p>`;ans.className='answer ok'}
     else if(!R){rv.innerHTML='';ans.className='answer'}
     else if(R.kind==='ok'){const f=x=>(x/1000).toFixed(2).replace('.',',')+' giây';const both=R.t[0]!==null&&R.t[1]!==null;
       rv.innerHTML=`<p class="reveal ok">${esc(s.names[R.p])} ${both?'nhanh hơn':'đúng trước'} (${f(R.t[R.p])}${both?' so với '+f(R.t[1-R.p]):''}): <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;ans.className=R.t[role]!==null?'answer ok':'answer'}
     else if(R.kind==='wrong'&&s.pend[role]!==null){rv.innerHTML=`<p class="reveal ok">Bạn trả lời đúng, đang chờ kết quả…</p>`}
-    else if(R.kind==='wrong'){rv.innerHTML=`<p class="reveal bad">${R.p===role?'Bạn trả lời sai, chờ đối thủ.':esc(s.names[R.p])+' trả lời sai. Bạn còn cơ hội!'}</p>`;if(R.p===role){ans.className='answer';void ans.offsetWidth;ans.className='answer bad'}}
+    else if(R.kind==='wrong'){rv.innerHTML=`<p class="reveal bad">${R.p===role?'Chưa đúng, thử lại!':esc(s.names[R.p])+' vừa trả lời sai.'}</p>`;
+      if(R.p===role&&R.n!==render.shook){render.shook=R.n;ans.className='answer';void ans.offsetWidth;ans.className='answer bad';inp.select()}}
     else if(R.kind==='both')rv.innerHTML=`<p class="reveal bad">Cả hai đều sai. Đáp án: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;
     else if(R.kind==='skip')rv.innerHTML=`<p class="reveal bad">Bỏ qua. Đáp án: <b>${esc(r.w)}</b> ${esc(r.ipa)}</p>`;
     const sk=document.getElementById('oskip'),nsk=s.skip.filter(Boolean).length;
