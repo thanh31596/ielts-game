@@ -237,6 +237,51 @@ input.num{width:90px}
 #mrv{margin-top:12px;font-weight:600}
 @media (max-width:520px){nav.tabs button{padding:6px 9px;font-size:.82rem}.choice kbd{display:none}.qsent{font-size:1.15rem}header{gap:8px}} #mrv .ok{color:var(--yes)}
 
+
+/* ---- reading ---- */
+.gamecard.wide1{margin-top:12px;width:100%}
+.rnote{color:var(--muted);font-size:.9rem;margin:0 0 14px;max-width:70ch}
+.rtypes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.rtype{text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;column-gap:10px}
+.rtype em{grid-row:span 2;font-style:normal;font-family:var(--serif);font-weight:700;font-size:1.4rem;color:var(--en);align-self:center}
+.rtype b{font-size:.98rem} .rtype span{color:var(--muted);font-size:.84rem}
+.rtype:hover{border-color:var(--ink)}
+.cl:disabled{opacity:.45;cursor:not-allowed}
+.rclock{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+.rwrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.rwrap{grid-template-columns:1fr}}
+.passage{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;font-family:var(--serif);font-size:1.02rem;line-height:1.65;max-height:78vh;overflow:auto;position:sticky;top:10px}
+@media (max-width:860px){.passage{position:static;max-height:none}}
+.passage h3{margin:0 0 10px;font-size:1.3rem}
+.passage p{margin:0 0 12px;padding:4px 6px;border-radius:6px;transition:background .3s}
+.passage p.hl{background:color-mix(in srgb,var(--lead) 30%,var(--card))}
+.plabel{font-family:var(--ui);color:var(--en);margin-right:4px}
+.rquestions{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.rins{margin:0 0 12px;color:var(--muted);font-size:.9rem} .rins b{color:var(--ink)}
+.rlist{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.92rem}
+.rlist div{padding:2px 0} .rlist i{font-style:normal;font-weight:700;color:var(--en);display:inline-block;min-width:2.2em}
+.rq{padding:9px 0;border-bottom:1px solid var(--rule);line-height:1.7}
+.qn{display:inline-grid;place-items:center;min-width:1.6em;height:1.6em;border-radius:6px;background:var(--desk-2);font-weight:700;font-size:.8rem;margin-right:6px;padding:0 4px}
+.rsel{font:inherit;border:1.5px solid var(--line);border-radius:8px;padding:3px 6px;background:var(--card);color:var(--ink);margin-left:4px}
+.tri{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.tri button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:5px 10px;font-size:.82rem;font-weight:600}
+.tri button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.mcopts{display:grid;gap:4px;margin-top:6px} .mcopts label{display:flex;gap:6px;align-items:baseline;cursor:pointer}
+.blank{font:inherit;border:0;border-bottom:2px solid var(--en);background:transparent;color:var(--ink);width:9em;padding:0 4px;margin:0 2px}
+.blank.bok{border-color:var(--yes);color:var(--yes)} .blank.bbad{border-color:var(--no);color:var(--no)}
+.limit{font-size:.88rem;color:var(--muted);margin:0 0 8px}
+.summary{line-height:2} .summary p{margin:4px 0 0}
+.rtable td,.rtable th{border:1px solid var(--rule)} .rtable{min-width:0}
+.flow{display:flex;flex-direction:column;align-items:stretch}
+.fstep{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;line-height:1.9}
+.farrow{text-align:center;color:var(--muted);line-height:1.2}
+.dgmwrap{text-align:center;margin-bottom:6px} .dgm{width:100%;max-width:380px;display:block;margin:6px auto}
+.dbx{fill:var(--desk-2);stroke:var(--line)} .dbl{fill:var(--card);stroke:var(--en);stroke-width:1.5;stroke-dasharray:4 3}
+.dtx{font-family:var(--ui);font-size:11px;fill:var(--ink)}
+.mark{margin-left:6px;font-weight:700;font-size:.9rem} .rok{color:var(--yes)} .rbad{color:var(--no)}
+.goto{border:0;background:none;color:var(--en);text-decoration:underline;font-size:.82rem;padding:0 2px}
+.rbtns{margin-top:14px}
+
 @media (prefers-reduced-motion: reduce){.inner,.track i,.mascot{transition:none}.mascot .body,.winner-av .body{animation:none}}
 </style>
 </head>
@@ -249,6 +294,7 @@ input.num{width:90px}
       <button role="tab" data-tab="flash" aria-selected="false">Flashcards</button>
       <button role="tab" data-tab="syn" aria-selected="false">Synonyms</button>
       <button role="tab" data-tab="col" aria-selected="false">Collocation</button>
+      <button role="tab" data-tab="read" aria-selected="false">Reading</button>
     </nav>
   </header>
   <main id="app"></main>
@@ -382,7 +428,7 @@ function setTab(t){document.querySelectorAll('nav.tabs button[data-tab]').forEac
 function clearKeys(){if(keyHandler){document.removeEventListener('keydown',keyHandler);keyHandler=null}}
 const VIEWS={};let viewSeq=0;const alive=s=>s===viewSeq;
 function go(view,arg){viewSeq++;clearKeys();window.scrollTo(0,0);stopMascots();if(!['host','join'].includes(view))closeNet();VIEWS[view](arg)}
-document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>b.onclick=()=>b.dataset.tab==='home'?go('home'):go('grid',b.dataset.tab));
+document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>b.onclick=()=>b.dataset.tab==='home'?go('home'):b.dataset.tab==='read'?go('reading'):go('grid',b.dataset.tab));
 document.getElementById('brand').onclick=()=>go('home');
 
 VIEWS.home=()=>{
@@ -390,8 +436,10 @@ VIEWS.home=()=>{
   app.innerHTML=`<section class="hero"><h2>Luyện từ vựng IELTS, một mình hoặc đấu với bạn bè.</h2>
     <p>Chọn một game, chọn cụm, rồi học hoặc thi đấu: đấu với thời gian, đấu cùng máy, hoặc đấu online trên hai thiết bị.</p></section>
     <div class="gamecards">${Object.entries(GAMES).map(([k,g])=>`<button class="gamecard" data-g="${k}"><b>${g.name}</b><span>${g.intro}</span><em>${g.data.length} cụm · ${g.data.reduce((s,c)=>s+c.length,0).toLocaleString('vi-VN')} ${k==='col'?'cụm từ':'từ'}</em></button>`).join('')}</div>
+    <button class="gamecard wide1" id="readCard"><b>Reading</b><span>14 dạng câu hỏi IELTS Reading: nối tiêu đề, True/False/Not Given, điền từ, sơ đồ… Đọc bài và làm như thi thật.</span><em>14 dạng · ${READING.length} bài đọc</em></button>
     <p style="margin-top:18px"><button class="ghost" id="joinBtn">Vào phòng online bằng mã</button></p>`;
   app.querySelectorAll('.gamecard').forEach(b=>b.onclick=()=>go('grid',b.dataset.g));
+  document.getElementById('readCard').onclick=()=>go('reading');
   document.getElementById('joinBtn').onclick=()=>go('join');
 };
 
@@ -908,6 +956,123 @@ function startOnline({role,g,i,n,names,first}){
   if(role===0)newGame();else render(first);
 }
 
+// ---------- IELTS Reading ----------
+const READING = [{"id":1,"title":"Bees on the Rooftops","topic":"Environment","paragraphs":[["A","Over the past fifteen years, beehives have appeared in some unlikely places: on the roofs of hotels, office towers, railway stations and even opera houses. In one European capital, the number of officially registered hives more than doubled within a decade, and similar growth has been reported in North America and Australia. Many of the new beekeepers are office workers with no background in agriculture, drawn to the hobby by a mixture of curiosity, concern for the environment and the appeal of producing their own honey."],["B","At first glance, a city seems a poor home for bees, yet colonies there often thrive. Parks, private gardens, railway embankments and tree-lined streets provide a wide range of flowering plants, so bees can find nectar from early spring until late autumn. Urban gardeners also tend to use fewer pesticides than large commercial farms, where a single crop may cover hundreds of hectares. In addition, cities are usually a few degrees warmer than the surrounding countryside, which allows bees to begin foraging earlier in the year and to continue later into the season."],["C","Not everyone welcomes the trend. Dr Hannah Ruiz, an ecologist who studies pollinators, argues that honeybees are domesticated animals and that adding thousands of them to a city can harm wild species such as bumblebees and solitary bees. 'A honeybee colony can contain fifty thousand workers,' she points out, 'and they all compete for the same limited supply of flowers.' Her surveys in several districts found that where hive numbers were highest, wild bees were visiting fewer flowers. She believes that cities should limit the number of hives in any given area."],["D","Most urban beekeepers use a modern frame hive, which is built as a stack of boxes. The whole structure rests on a stand that lifts it off the damp ground. Near the bottom is a narrow entrance through which the bees come and go. The lowest box, known as the brood box, is where the queen lays her eggs. Above it sits the queen excluder, a flat metal grid with gaps large enough for worker bees to pass through but too small for the larger queen. As a result, the boxes above, called supers, contain only honey. An inner cover and a sloping roof keep out rain."],["E","Harvesting honey follows a set sequence. First, the beekeeper calms the colony by gently puffing smoke into the entrance. The frames are then lifted out of the supers, and a heated knife is used to slice off the thin layer of wax that seals each cell. Next, the frames are placed in an extractor, a drum that spins them rapidly so that the honey is thrown out by centrifugal force. The honey is poured through a fine mesh to remove pieces of wax, and then left to stand for several days so that air bubbles can rise to the surface before it is finally put into jars."],["F","A survey carried out by one national beekeeping association suggests that city hives can be surprisingly productive. According to its figures, an urban hive produced on average around 18 kilograms of honey a year, compared with roughly 11 kilograms for a hive in the countryside. Urban honey also tends to have a more complex flavour, because it comes from a greater variety of plants, and it often sells at a higher price. Rural beekeepers, however, can usually keep far more hives, so their total production remains much larger."],["G","Supporters such as Professor Tomas Lindqvist, who runs an education programme, stress the value of rooftop hives in schools. 'Children who watch a colony at work learn more about food and nature than any textbook can teach them,' he says. Amara Osei, a beekeeper with twenty years of experience, is more cautious: she thinks that every new hive should be registered so that disease can be tracked. In my view, urban beekeeping is a worthwhile activity, but it should not be confused with conservation. Anyone who genuinely wants to help bees would do better to plant flowers than to buy a hive."]],"people":[["A","Dr Hannah Ruiz"],["B","Professor Tomas Lindqvist"],["C","Amara Osei"]],"sets":{"headings":{"list":[["i","Why cities can suit bees"],["ii","The layered design of a typical hive"],["iii","A threat to other insects"],["iv","The high cost of starting a hive"],["v","An unexpected rise in city beekeeping"],["vi","Collecting honey step by step"],["vii","Comparing yields from town and country"],["viii","Teaching, regulation and the writer's verdict"],["ix","The decline of rural farming"]],"q":[["A","v"],["B","i"],["C","iii"],["D","ii"],["E","vi"],["F","vii"],["G","viii"]]},"info":{"q":[["a reason why bees can find food for a long part of the year","B"],["a description of how unwanted material is removed from honey","E"],["a suggestion that hive numbers should be restricted","C"],["the kinds of people who have recently taken up beekeeping","A"],["a reason why countryside beekeepers still produce more honey in total","F"]]},"features":{"q":[["believes that too many honeybees reduce flower visits by wild bees","A"],["thinks new hives should be officially recorded","C"],["says that observing bees teaches children more than books do","B"],["has carried out surveys in different parts of a city","A"],["has worked with bees for two decades","C"]]},"endings":{"list":[["A","because it is too big to fit through the gaps."],["B","because cities are warmer than the countryside."],["C","because they can keep a larger number of hives."],["D","because it comes from many different plants."],["E","because honey is heavier than wax."],["F","so that air bubbles can escape."]],"q":[["Bees in cities can start collecting food earlier in the year","B"],["The queen cannot enter the supers","A"],["Honey is left to stand for several days","F"],["City honey often tastes more complex","D"],["Rural beekeepers produce more honey overall","C"]]},"tfng":{"q":[["The number of registered hives in one European capital more than doubled in ten years.","TRUE","A"],["Some of the new urban beekeepers work in offices.","TRUE","A"],["Large commercial farms often grow a single crop over a large area.","TRUE","B"],["Urban bees suffer from more diseases than rural bees.","NOT GIVEN","B"],["The queen excluder is made of wood.","FALSE","D"],["Urban honey is usually sold at a lower price than rural honey.","FALSE","F"]]},"ynng":{"q":[["Urban beekeeping is a worthwhile activity.","YES","G"],["Keeping bees in cities is an effective form of conservation.","NO","G"],["Planting flowers helps bees more than buying a hive.","YES","G"],["Governments should pay people to keep bees in cities.","NOT GIVEN","G"]]},"mc":{"q":[["According to paragraph B, which is NOT mentioned as a source of flowers in cities?",["parks","railway embankments","rooftop farms","tree-lined streets"],2,"B"],["What does Dr Ruiz's research show?",["Wild bees were visiting fewer flowers where there were more hives.","Honeybees produce less honey in crowded areas.","Solitary bees attack honeybee colonies.","Wild bees prefer city parks to gardens."],0,"C"],["What is the purpose of the smoke used by beekeepers?",["to remove wax from the frames","to make the bees calmer","to warm the hive","to improve the flavour of honey"],1,"E"],["According to the survey, how much honey did an average rural hive produce each year?",["about 11 kilograms","about 15 kilograms","about 18 kilograms","about 50 kilograms"],0,"F"]]},"title":{"o":["How to Make Money from Honey","Bees on the Rooftops: Benefits and Doubts","The Disappearance of Wild Bees","A History of Beekeeping in Europe"],"a":1},"short":{"limit":"NO MORE THAN TWO WORDS","q":[["What part of the hive does the queen lay her eggs in?",["brood box","the brood box"],"D"],["What tool is used to cut the wax off the cells?",["heated knife","a heated knife","knife"],"E"],["What force throws the honey out of the frames?",["centrifugal force","centrifugal"],"E"],["What should every new hive be, according to Amara Osei?",["registered"],"G"]]},"sentence":{"limit":"NO MORE THAN TWO WORDS","q":[["The hive stand keeps the structure away from the ___ ground.",["damp"],"D"],["Honeybees are described by Dr Ruiz as ___ animals.",["domesticated"],"C"],["After extraction, honey passes through a fine ___ to remove wax.",["mesh"],"E"],["An inner cover and a sloping ___ protect the hive from rain.",["roof"],"D"]]},"summary":{"limit":"NO MORE THAN TWO WORDS","title":"Why bees thrive in cities","text":"Cities offer bees a wide range of {1}, so food is available from early spring to late autumn. Urban gardeners generally use fewer {2} than large farms. Because cities are a few degrees {3} than the countryside, bees can forage for a longer season. However, one ecologist warns that honeybees compete with wild species such as bumblebees and {4} bees.","a":{"1":["flowering plants","plants"],"2":["pesticides"],"3":["warmer"],"4":["solitary"]}},"table":{"limit":"ONE WORD AND/OR A NUMBER","head":["","Urban hives","Rural hives"],"rows":[["Average honey per hive (kg/year)","{1}","{2}"],["Flavour of honey","more {3}","less varied"],["Total production","smaller","much {4}"]],"a":{"1":["18"],"2":["11"],"3":["complex"],"4":["larger"]}},"flow":{"limit":"NO MORE THAN TWO WORDS","steps":["Calm the colony by puffing {1} into the entrance","Lift the frames out of the {2}","Slice off the wax with a heated knife","Spin the frames in an {3}","Pour the honey through a fine mesh","Leave it for several days so that {4} can rise","Put the honey into jars"],"a":{"1":["smoke"],"2":["supers"],"3":["extractor"],"4":["air bubbles","bubbles"]}},"diagram":{"limit":"NO MORE THAN TWO WORDS","title":"A modern frame hive","w":360,"h":300,"boxes":[[110,10,140,30,"{1}",1],[110,45,140,16,"inner cover",0],[110,66,140,58,"{2} (honey only)",1],[110,129,140,20,"{3}",1],[110,154,140,88,"{4} (eggs)",1],[150,242,60,12,"entrance",0],[120,258,120,30,"stand",0]],"a":{"1":["roof","sloping roof"],"2":["supers","super"],"3":["queen excluder","excluder"],"4":["brood box"]}}}},{"id":2,"title":"Farming Upwards","topic":"Technology & Food","paragraphs":[["A","By the middle of this century, around two thirds of the world's population is expected to live in cities, and feeding them will require more food than ever before. Yet much of the land best suited to agriculture is already in use, and in many regions fertile soil is being lost to erosion and urban expansion. One proposed solution is to stop farming outwards and start farming upwards: growing crops indoors, in stacked layers, inside buildings located in or near the cities that will eat them."],["B","A typical vertical farm looks less like a field than a warehouse. Plants grow in shallow trays arranged on shelves that may rise ten or more levels high. At the top of each level, rows of LED lamps replace the sun, and they can be tuned to the exact colours of light that plants use most efficiently. Beneath the trays, pipes carry a nutrient solution, water mixed with the minerals that crops would normally take from soil. At the base of the structure, a large tank stores this solution, and a pump sends it back up to the highest shelf. Sensors placed throughout the building measure temperature, humidity and the concentration of nutrients."],["C","Most vertical farms rely on a method called hydroponics, in which roots are kept in water rather than soil. The cycle begins when seeds are planted in small plugs of a fibre such as coconut husk. Once the seedlings have developed roots, they are moved into the growing trays. The nutrient solution flows past the roots, and any liquid the plants do not absorb drains back into the tank, where it is filtered and topped up with fresh minerals before being pumped round again. When the crops are ready, they are harvested and packed on site, often within hours of being delivered to shops."],["D","Supporters point to several advantages. Because water is recycled, some operators claim to use up to ninety-five per cent less water than a conventional farm growing the same crop. Crops are protected from storms, droughts and insects, so pesticides are rarely needed, and harvests can take place all year round. Food engineer Dr Lena Park believes that the greatest benefit is reliability: 'A farmer outdoors never knows what the weather will do. Indoors, we can promise a supermarket exactly how much lettuce it will receive each week.'"],["E","Critics, however, highlight the cost of energy. Replacing sunlight with electric lamps requires enormous amounts of power, and unless that power comes from renewable sources, the carbon emissions may cancel out the environmental benefits. Economist Rafael Mendes calculates that, at current electricity prices, vertical farming only makes financial sense for crops that grow quickly and sell at a high price. 'Leafy greens and herbs work,' he says, 'but you will never see wheat or rice grown this way on a large scale. The numbers simply do not add up.'"],["F","There have been failures as well as successes. Several well-funded companies have closed after struggling to cover their running costs, while others have survived by building next to solar farms or by selling their technology to supermarkets. Sofia Brandt, the manager of a vertical farm in northern Europe, says that location matters more than technology. Her farm uses waste heat from a nearby data centre, which reduces its heating bills by around a third during the long winter months."],["G","I believe vertical farming is best seen as a supplement to traditional agriculture rather than a replacement for it. It can supply cities with fresh salads and herbs, reduce the distance food travels and create skilled jobs, but it cannot feed the world on its own. Staple crops will continue to be grown in fields for the foreseeable future. The most sensible policy, therefore, is to support indoor farms where energy is cheap and clean, while also protecting the farmland we already have."]],"people":[["A","Dr Lena Park"],["B","Rafael Mendes"],["C","Sofia Brandt"]],"sets":{"headings":{"list":[["i","The inside of a vertical farm"],["ii","Why farming needs to go indoors"],["iii","How water and minerals move through the system"],["iv","Lower water use and predictable harvests"],["v","The energy problem"],["vi","Mixed results for the industry"],["vii","A role alongside field farming"],["viii","The history of greenhouse design"],["ix","Consumer attitudes to indoor food"]],"q":[["A","ii"],["B","i"],["C","iii"],["D","iv"],["E","v"],["F","vi"],["G","vii"]]},"info":{"q":[["a reference to crops being sold very soon after they are picked","C"],["a claim about a large reduction in water use","D"],["an example of a farm using heat that would otherwise be wasted","F"],["a reason why good farmland is becoming scarcer","A"],["a list of what the sensors in a vertical farm record","B"]]},"features":{"q":[["thinks that where a farm is built is more important than its equipment","C"],["argues that indoor farming allows accurate promises to buyers","A"],["says that vertical farming suits only certain types of crop","B"],["works at a farm in northern Europe","C"],["believes grain crops will not be grown indoors on a large scale","B"]]},"endings":{"list":[["A","because the crops are protected from insects."],["B","because they can be adjusted to particular colours."],["C","because it is filtered and reused."],["D","unless the electricity is renewable."],["E","because they are too heavy for the shelves."],["F","by building near sources of cheap energy."]],"q":[["LED lamps are useful in vertical farms","B"],["Vertical farms need very little pesticide","A"],["Water is not wasted in hydroponic systems","C"],["The environmental benefits of vertical farms may disappear","D"],["Some vertical farming companies have survived","F"]]},"tfng":{"q":[["About two thirds of people are expected to live in cities by the middle of this century.","TRUE","A"],["The shelves in vertical farms are never more than five levels high.","FALSE","B"],["Seeds are first planted in plugs made of fibre.","TRUE","C"],["Vertical farms grow more varieties of lettuce than outdoor farms.","NOT GIVEN","D"],["All vertical farming companies have made a profit.","FALSE","F"],["The data centre near Sofia Brandt's farm is powered by wind energy.","NOT GIVEN","F"]]},"ynng":{"q":[["Vertical farming should replace traditional agriculture.","NO","G"],["Vertical farms can reduce how far food has to travel.","YES","G"],["Existing farmland should be protected.","YES","G"],["Vertical farms will become cheaper than field farms within ten years.","NOT GIVEN","G"]]},"mc":{"q":[["What is stored in the tank at the base of a vertical farm?",["seeds","the nutrient solution","harvested crops","waste heat"],1,"B"],["What happens to liquid that plants do not absorb?",["It is thrown away.","It is used to cool the lamps.","It returns to the tank and is reused.","It is sold to other farms."],2,"C"],["According to Rafael Mendes, which crops make financial sense to grow indoors?",["wheat and rice","any crop with a large market","fast-growing, high-value crops","crops that need little light"],2,"E"],["By how much does waste heat reduce Sofia Brandt's winter heating bills?",["by about a quarter","by about a third","by about half","by about ninety-five per cent"],1,"F"]]},"title":{"o":["The End of Traditional Farming","How to Build a Greenhouse","Farming Upwards: Promise and Limits","Why Cities Are Growing So Fast"],"a":2},"short":{"limit":"NO MORE THAN TWO WORDS","q":[["What do LED lamps replace in a vertical farm?",["the sun","sun","sunlight"],"B"],["What is the name of the method of growing plants in water?",["hydroponics"],"C"],["What material is given as an example of the fibre used for seed plugs?",["coconut husk"],"C"],["What does Dr Park consider the greatest benefit of vertical farming?",["reliability"],"D"]]},"sentence":{"limit":"NO MORE THAN TWO WORDS","q":[["Fertile soil is being lost to erosion and urban ___.",["expansion"],"A"],["A pump sends the nutrient solution back up to the highest ___.",["shelf"],"B"],["Critics argue that the ___ emissions from lighting may cancel out the benefits.",["carbon"],"E"],["Vertical farming is described by the writer as a ___ to traditional agriculture.",["supplement"],"G"]]},"summary":{"limit":"NO MORE THAN TWO WORDS","title":"Advantages and disadvantages","text":"Because vertical farms recycle {1}, they may use far less of it than outdoor farms. Crops are safe from storms, droughts and insects, and harvests are possible all {2}. The main problem is the cost of {3}, since lamps need huge amounts of power. As a result, only crops such as leafy greens and {4} are currently profitable.","a":{"1":["water"],"2":["year round","year"],"3":["energy","electricity"],"4":["herbs"]}},"table":{"limit":"ONE WORD ONLY","head":["Person","Role","Main point"],"rows":[["Lena Park","food {1}","indoor farming is reliable"],["Rafael Mendes","{2}","only some crops are profitable"],["Sofia Brandt","farm {3}","{4} matters more than technology"]],"a":{"1":["engineer"],"2":["economist"],"3":["manager"],"4":["location"]}},"flow":{"limit":"ONE WORD ONLY","steps":["Plant seeds in small plugs of fibre","Move {1} with roots into the growing trays","Nutrient solution flows past the {2}","Unused liquid drains back into the {3}","Solution is {4} and topped up with minerals","Crops are harvested and packed on site"],"a":{"1":["seedlings"],"2":["roots"],"3":["tank"],"4":["filtered"]}},"diagram":{"limit":"ONE OR TWO WORDS","title":"One level of a vertical farm (side view)","w":360,"h":320,"boxes":[[60,10,240,26,"{1}",1],[60,70,240,34,"growing trays",0],[60,110,240,16,"{2} carrying solution",1],[250,150,80,26,"{3}",1],[60,190,240,22,"more shelves",0],[60,250,240,50,"{4} (stores solution)",1]],"a":{"1":["LED lamps","lamps","LED lights"],"2":["pipes"],"3":["sensors","sensor"],"4":["tank"]}}}}];
+const RTYPES=[
+ ['headings','Matching Headings','Nối tiêu đề','Chọn tiêu đề phù hợp (i–ix) cho mỗi đoạn. Có nhiều tiêu đề hơn số đoạn.'],
+ ['info','Matching Information','Nối thông tin','Mỗi thông tin dưới đây nằm ở đoạn nào (A–G)?'],
+ ['features','Matching Features','Nối đặc điểm','Nối mỗi nhận định với người phù hợp. Một người có thể được chọn nhiều lần.'],
+ ['endings','Matching Sentence Endings','Nối nửa câu','Chọn phần cuối (A–F) để hoàn thành mỗi câu. Có nhiều phần cuối hơn số câu.'],
+ ['tfng','True / False / Not Given','Đúng / Sai / Không có','Thông tin có khớp với bài đọc không? TRUE = khớp, FALSE = trái ngược, NOT GIVEN = không đề cập.'],
+ ['ynng','Yes / No / Not Given','Quan điểm tác giả','Nhận định có khớp với quan điểm của tác giả không? YES = khớp, NO = trái ngược, NOT GIVEN = không thể biết.'],
+ ['mc','Multiple Choice','Trắc nghiệm','Chọn đáp án đúng A, B, C hoặc D.'],
+ ['title','Choose a Title','Chọn tiêu đề bài','Chọn tiêu đề phù hợp nhất cho toàn bài đọc.'],
+ ['short','Short Answers','Trả lời ngắn','Trả lời câu hỏi bằng từ lấy từ bài đọc.'],
+ ['sentence','Sentence Completion','Hoàn thành câu','Hoàn thành câu bằng từ lấy từ bài đọc.'],
+ ['summary','Summary Completion','Hoàn thành tóm tắt','Hoàn thành đoạn tóm tắt bằng từ lấy từ bài đọc.'],
+ ['table','Table Completion','Hoàn thành bảng','Hoàn thành bảng bằng từ lấy từ bài đọc.'],
+ ['flow','Flow-chart Completion','Hoàn thành lưu đồ','Hoàn thành lưu đồ bằng từ lấy từ bài đọc.'],
+ ['diagram','Diagram Label Completion','Điền nhãn sơ đồ','Điền nhãn cho sơ đồ bằng từ lấy từ bài đọc.']
+];
+const RT=Object.fromEntries(RTYPES.map(r=>[r[0],r]));
+const PER_TYPE=10;
+const rnorm=s=>String(s||'').toLowerCase().replace(/[’']/g,"'").replace(/[.,;:!?"]/g,' ').replace(/\s+/g,' ').trim().replace(/^(the|a|an) /,'');
+const textOK=(v,alts)=>alts.some(a=>rnorm(a)===rnorm(v));
+
+VIEWS.reading=()=>{
+  setTab('read');
+  app.innerHTML=`<div class="gridhead"><h2>IELTS Reading: chọn dạng bài</h2><p>${RTYPES.length} dạng · ${READING.length}/${PER_TYPE} bài mỗi dạng đã có</p></div>
+  <p class="rnote">Các bài đọc do Claude viết để luyện tập. Nhân vật và số liệu khảo sát trong bài là hư cấu, không dùng làm nguồn tham khảo thực tế.</p>
+  <div class="rtypes">${RTYPES.map(([k,en,vi],n)=>`<button class="rtype" data-t="${k}"><em>${n+1}</em><b>${en}</b><span>${vi}</span></button>`).join('')}</div>`;
+  app.querySelectorAll('.rtype').forEach(b=>b.onclick=()=>go('rtype',b.dataset.t));
+};
+VIEWS.rtype=t=>{
+  setTab('read');const [k,en,vi,ins]=RT[t];
+  app.innerHTML=`<div class="bar"><button class="back" id="bk">‹ Các dạng bài</button><h2>${en}</h2></div>
+  <p class="rnote">${vi}. ${ins}</p>
+  <div class="clusters wide">${Array.from({length:PER_TYPE},(_,n)=>{const p=READING[n];return p?`<button class="cl" data-p="${n}"><b>Bài ${n+1}</b><span>${esc(p.title)}</span></button>`:`<button class="cl" disabled><b>Bài ${n+1}</b><span>Sắp có</span></button>`}).join('')}</div>`;
+  document.getElementById('bk').onclick=()=>go('reading');
+  app.querySelectorAll('.cl[data-p]').forEach(b=>b.onclick=()=>go('rex',{t,n:+b.dataset.p}));
+};
+
+VIEWS.rex=({t,n})=>{
+  setTab('read');const P=READING[n],S=P.sets[t],[k,en,vi,ins]=RT[t];const my=viewSeq;
+  const L=P.paragraphs.map(p=>p[0]);
+  const sel=(id,opts)=>`<select class="rsel" data-q="${id}"><option value="">–</option>${opts.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select>`;
+  const blank=id=>`<input class="blank" data-q="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chỗ trống ${id}"><span class="mark" data-m="${id}"></span>`;
+  let qhtml='',key={},where={};
+  const q=S.q||[];
+  if(t==='headings'){
+    qhtml=`<div class="rlist"><b>List of Headings</b>${S.list.map(([r,h])=>`<div><i>${r}</i> ${esc(h)}</div>`).join('')}</div>`+
+      S.q.map(([p,a],x)=>{key[x]=a;return `<div class="rq"><span class="qn">${x+1}</span> Paragraph ${p} ${sel(x,S.list.map(h=>h[0]))}<span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='info'){
+    qhtml=q.map(([s,a],x)=>{key[x]=a;where[x]=a;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)} ${sel(x,L)}<span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='features'){
+    qhtml=`<div class="rlist"><b>List of People</b>${P.people.map(([l,nm])=>`<div><i>${l}</i> ${esc(nm)}</div>`).join('')}</div>`+
+      q.map(([s,a],x)=>{key[x]=a;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)} ${sel(x,P.people.map(p=>p[0]))}<span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='endings'){
+    qhtml=`<div class="rlist"><b>Endings</b>${S.list.map(([l,e])=>`<div><i>${l}</i> ${esc(e)}</div>`).join('')}</div>`+
+      q.map(([s,a],x)=>{key[x]=a;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)} … ${sel(x,S.list.map(e=>e[0]))}<span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='tfng'||t==='ynng'){
+    const O=t==='tfng'?['TRUE','FALSE','NOT GIVEN']:['YES','NO','NOT GIVEN'];
+    qhtml=q.map(([s,a,p],x)=>{key[x]=a;where[x]=p;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)}<div class="tri" data-q="${x}">${O.map(o=>`<button data-v="${o}">${o}</button>`).join('')}</div><span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='mc'){
+    qhtml=q.map(([s,o,a,p],x)=>{key[x]=String(a);where[x]=p;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)}<div class="mcopts" data-q="${x}">${o.map((op,i)=>`<label><input type="radio" name="mc${x}" value="${i}"> <b>${'ABCD'[i]}</b> ${esc(op)}</label>`).join('')}</div><span class="mark" data-m="${x}"></span></div>`}).join('');
+  }else if(t==='title'){
+    key[0]=String(S.a);
+    qhtml=`<div class="rq"><span class="qn">1</span> Which is the most suitable title for the passage?<div class="mcopts" data-q="0">${S.o.map((op,i)=>`<label><input type="radio" name="mc0" value="${i}"> <b>${'ABCD'[i]}</b> ${esc(op)}</label>`).join('')}</div><span class="mark" data-m="0"></span></div>`;
+  }else if(t==='short'){
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p>`+q.map(([s,a,p],x)=>{key[x]=a;where[x]=p;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s)}<div>${blank(x)}</div></div>`}).join('');
+  }else if(t==='sentence'){
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p>`+q.map(([s,a,p],x)=>{key[x]=a;where[x]=p;return `<div class="rq"><span class="qn">${x+1}</span> ${esc(s).replace('___',blank(x))}</div>`}).join('');
+  }else if(t==='summary'){
+    Object.entries(S.a).forEach(([i,a])=>key[i]=a);
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p><div class="summary"><b>${esc(S.title)}</b><p>${esc(S.text).replace(/\{(\d+)\}/g,(m,i)=>`<span class="qn">${i}</span>${blank(i)}`)}</p></div>`;
+  }else if(t==='table'){
+    Object.entries(S.a).forEach(([i,a])=>key[i]=a);
+    const cell=c=>esc(c).replace(/\{(\d+)\}/g,(m,i)=>`<span class="qn">${i}</span>${blank(i)}`);
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p><div class="tablewrap"><table class="rtable"><thead><tr>${S.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${S.rows.map(r=>`<tr>${r.map((c,ci)=>ci===0?`<th>${cell(c)}</th>`:`<td>${cell(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }else if(t==='flow'){
+    Object.entries(S.a).forEach(([i,a])=>key[i]=a);
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p><div class="flow">${S.steps.map(s=>`<div class="fstep">${esc(s).replace(/\{(\d+)\}/g,(m,i)=>`<span class="qn">${i}</span>${blank(i)}`)}</div>`).join('<div class="farrow">↓</div>')}</div>`;
+  }else if(t==='diagram'){
+    Object.entries(S.a).forEach(([i,a])=>key[i]=a);
+    const svg=`<svg viewBox="0 0 ${S.w} ${S.h}" class="dgm" role="img" aria-label="${esc(S.title)}">${S.boxes.map(([x,y,w,h,lab,bl])=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="${bl?'dbl':'dbx'}"/><text x="${x+w/2}" y="${y+h/2}" dominant-baseline="middle" text-anchor="middle" class="dtx">${esc(lab.replace(/\{(\d+)\}/,'($1) ______'))}</text>`).join('')}</svg>`;
+    qhtml=`<p class="limit">Write <b>${S.limit}</b> from the passage.</p><div class="dgmwrap"><b>${esc(S.title)}</b>${svg}</div>`+Object.keys(S.a).map(i=>`<div class="rq"><span class="qn">${i}</span> ${blank(i)}</div>`).join('');
+  }
+  app.innerHTML=`<div class="bar"><button class="back" id="bk">‹ ${en}</button><h2>Bài ${n+1}: ${esc(P.title)}</h2><span class="rclock" id="rclock">0:00</span></div>
+  <div class="rwrap"><article class="passage" id="passage"><h3>${esc(P.title)}</h3>${P.paragraphs.map(([l,tx])=>`<p data-p="${l}"><b class="plabel">${l}</b> ${esc(tx)}</p>`).join('')}</article>
+  <section class="rquestions"><p class="rins"><b>${en}</b><br>${esc(ins)}</p>${qhtml}
+  <div class="rbtns"><button class="primary" id="rsub">Nộp bài</button></div><div id="rres"></div></section></div>`;
+  document.getElementById('bk').onclick=()=>go('rtype',t);
+  const t0=Date.now();let tick=setInterval(()=>{if(!alive(my))return clearInterval(tick);const s=Math.floor((Date.now()-t0)/1000);const c=document.getElementById('rclock');if(c)c.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`},1000);gameTick=tick;
+  app.querySelectorAll('.tri').forEach(d=>d.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(d.dataset.locked)return;d.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));d.dataset.v=b.dataset.v}));
+  const val=id=>{
+    const s=app.querySelector(`.rsel[data-q="${id}"]`);if(s)return s.value;
+    const tr=app.querySelector(`.tri[data-q="${id}"]`);if(tr)return tr.dataset.v||'';
+    const mc=app.querySelector(`.mcopts[data-q="${id}"] input:checked`);if(mc)return mc.value;
+    const bl=app.querySelector(`.blank[data-q="${id}"]`);if(bl)return bl.value;return '';
+  };
+  document.getElementById('rsub').onclick=()=>{
+    clearInterval(tick);let right=0;const ids=Object.keys(key);
+    ids.forEach(id=>{
+      const v=val(id),a=key[id];const ok=Array.isArray(a)?textOK(v,a):v===a;if(ok)right++;
+      const m=app.querySelector(`.mark[data-m="${id}"]`);
+      let ans=Array.isArray(a)?a[0]:a;if(t==='mc')ans='ABCD'[+a]+'. '+q[+id][1][+a];if(t==='title')ans='ABCD'[+a]+'. '+S.o[+a];
+      if(m)m.innerHTML=ok?'<span class="rok">✓</span>':`<span class="rbad">✗ ${esc(ans)}</span>${where[id]?` <button class="goto" data-p="${where[id]}">xem đoạn ${where[id]}</button>`:''}`;
+      const bl=app.querySelector(`.blank[data-q="${id}"]`);if(bl){bl.classList.add(ok?'bok':'bbad');bl.readOnly=true}
+      app.querySelectorAll(`.tri[data-q="${id}"]`).forEach(d=>d.dataset.locked=1);
+    });
+    app.querySelectorAll('.rsel,.mcopts input').forEach(e=>e.disabled=true);
+    app.querySelectorAll('.goto').forEach(b=>b.onclick=()=>{const p=app.querySelector(`#passage p[data-p="${b.dataset.p}"]`);app.querySelectorAll('#passage p').forEach(x=>x.classList.remove('hl'));p.classList.add('hl');p.scrollIntoView({behavior:'smooth',block:'center'})});
+    const secs=Math.floor((Date.now()-t0)/1000);
+    document.getElementById('rsub').remove();
+    document.getElementById('rres').innerHTML=`<div class="result" style="margin-top:14px"><p class="big">${right}/${ids.length}</p><p>Thời gian: ${Math.floor(secs/60)} phút ${secs%60} giây</p>
+      <div class="btns"><button class="ghost" id="again">Làm lại</button>${READING[n+1]?`<button class="primary" id="nextEx">Bài ${n+2}</button>`:''}</div></div>`;
+    document.getElementById('again').onclick=()=>go('rex',{t,n});
+    const nx=document.getElementById('nextEx');if(nx)nx.onclick=()=>go('rex',{t,n:n+1});
+  };
+};
 
 const _room=new URLSearchParams(location.search).get('room');
 if(_room)go('join',_room.toUpperCase().slice(0,5));else go('home');
