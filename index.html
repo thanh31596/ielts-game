@@ -166,7 +166,9 @@ input.num{width:90px}
 .qcard{background:var(--card);border-radius:14px;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(20,40,70,.12);padding:22px 24px;margin-bottom:14px}
 .qhead{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-bottom:10px}
 .qcard .bpos{margin:0 0 12px}
-.slots{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.slots{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;align-items:flex-end;padding-top:20px}
+.slots i[data-l]{position:relative;background:var(--en)}
+.slots i[data-l]::before{content:attr(data-l);position:absolute;bottom:6px;left:0;width:100%;text-align:center;font-weight:700;font-size:1.05rem;color:var(--en);font-family:var(--ui)}
 .slots i{width:18px;height:3px;background:var(--line);border-radius:2px;display:block}
 .slots em{font-style:normal;color:var(--muted);font-size:.8rem;margin-left:6px;line-height:3px}
 .answer{display:flex;gap:8px}
@@ -585,7 +587,7 @@ const GAMES={
 };
 // A question is {g,i,j,opts}: game, cluster, item index, option list (null for typed answers).
 function makeQ(g,i,j){
-  if(g==='flash')return {g,i,j,opts:null};
+  if(g==='flash'){const w=CLUSTERS[i][j].w;const idx=[...w].map((c,k)=>/[a-z]/i.test(c)?k:-1).filter(k=>k>=0);return {g,i,j,opts:null,h:idx[Math.floor(Math.random()*idx.length)]}}
   if(g==='syn'){const r=SYN[i][j];const ans=r.syn[Math.floor(Math.random()*r.syn.length)];return {g,i,j,opts:shuffle([ans,...sample(r.pool,3)])}}
   if(g==='lis')return {g,i,j,opts:null};
   if(g==='t1'){const seed=Math.floor(Math.random()*2**31);const G=t1gen(seed,T1K[i]);return {g,i,j,seed,opts:G.tap?null:G.opts}}
@@ -612,7 +614,7 @@ function isRight(q,v){
 function qItem(q){if(q.g==='t1')return t1gen(q.seed,T1K[q.i]);return GAMES[q.g].data[q.i][q.j]}
 function qHTML(q){
   const r=qItem(q);
-  if(q.g==='flash')return clueHTML(r);
+  if(q.g==='flash')return clueHTML(r,q.h);
   if(q.g==='syn')return `<p class="bpos">${POS_VI[r.pos]||r.pos}</p><p class="qword">${esc(r.w)}</p><p class="blabel">Chọn từ đồng nghĩa</p>`;
   if(q.g==='t1')return `<p class="bpos">${T1VI[q.i]}</p><p class="t1q">${esc(r.prompt)}</p>${r.stmt?`<p class="qsent">“${esc(r.stmt)}”</p>`:''}${r.tap?'':t1ChartHead(r.C)+chartSVG(r.C)}`;
   if(q.g==='t2r')return `<p class="bpos">Đề bài</p><p class="t2prompt">${esc(T2P[r.p].text)}</p><p class="blabel">Ý tưởng</p><p class="qsent">${esc(r.t)}</p>`;
@@ -694,10 +696,10 @@ function spawnMascot(arena,m,label){
 function avatar(m){return `<div class="av">${m.svg}</div>`}
 function react(el,ok){if(!el)return;el.classList.remove('jump','sad');void el.offsetWidth;el.classList.add(ok?'jump':'sad');setTimeout(()=>el.classList.remove('jump','sad'),700)}
 
-function slotsHTML(w){return `<div class="slots" aria-label="${w.length} chữ cái">${[...w].map(c=>c===' '?'<span style="width:10px"></span>':'<i></i>').join('')}<em>${w.length} chữ cái</em></div>`}
-function clueHTML(r){return `<p class="bpos">${POS_VI[r.pos]||r.pos} (${esc(r.pos)})</p>
+function slotsHTML(w,h){const hint=h!=null&&w[h]?` · gợi ý: chữ thứ ${h+1} là “${w[h]}”`:'';return `<div class="slots" aria-label="${w.length} chữ cái${hint}">${[...w].map((c,k)=>c===' '?'<span style="width:10px"></span>':k===h?`<i data-l="${esc(c)}"></i>`:'<i></i>').join('')}<em>${w.length} chữ cái</em></div>`}
+function clueHTML(r,h){return `<p class="bpos">${POS_VI[r.pos]||r.pos} (${esc(r.pos)})</p>
   <p class="blabel">English</p><p class="ben">${esc(r.en)}</p>
-  <p class="blabel">Tiếng Việt</p><p class="bvi">${esc(r.vi)}</p>${slotsHTML(r.w)}`}
+  <p class="blabel">Tiếng Việt</p><p class="bvi">${esc(r.vi)}</p>${slotsHTML(r.w,h)}`}
 const HISTORY={}; // session only, lost on reload
 
 // ---------- routing ----------
